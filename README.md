@@ -15,9 +15,3 @@ Feel free to clone the repo or even add to the Repo if you wish.
 Thanks,
 Kush Pakki
 Mentor High School
-
-### Breakdown of the Repo
-
-
-
-
