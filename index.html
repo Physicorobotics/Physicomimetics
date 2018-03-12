@@ -1,0 +1,173 @@
+<!doctype html>
+<meta name="robots" content="noindex">
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Canvas Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/synaptic/1.1.4/synaptic.js"></script>
+    <style id="jsbin-css">
+        canvas {
+            width: 500px;
+            height: 500px;
+            background-color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <section>
+        <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+        <h1>Momentum: <small></small> </h1>
+        <div>
+            <canvas id="canvas" width="500" height="500">
+        This text is displayed if your browser does not support HTML5 Canvas.
+      </canvas>
+        </div>
+
+    </section>
+
+    <h3></h3>
+    <script id="jsbin-javascript">
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+
+        var N = 2;
+        var timeinterval = .00005;
+
+        var canvas;
+        var ctx;
+        var R = getRandomInt(50, 250);
+        var x = 250 - (R / 2);
+        var y = 250 - (R / 2)
+        var x2 = 250 + (R / 2);
+        var y2 = 250 + (R / 2)
+
+        var WIDTH = 500;
+        var HEIGHT = 500;
+        var mass = 5;
+        var mass2 = 5;
+
+        var v = [0, 0];
+        var v2 = [0, 0];
+        var timestop = false;
+        var time = 0;
+        var buzzed = false;
+
+        function grav(xr, yr, n, g, m1, m2) {
+            var f = g * m1 * m2 * Math.pow(xr, n);
+            var thetha = Math.atan(yr / xr);
+            var fy = f * Math.sin(thetha);
+            var fx = f * Math.cos(thetha);
+            if (xr < 10 && xr > -10 && yr < 10 && y > 10) {
+                v = [0, 0];
+                v2 = [0, 0];
+
+                timestop = true;
+            } else {
+                if (x > x2) {
+                    var a1 = fx / m1;
+                    var a2 = fx / m2;
+                    v[0] = v[0] - a1;
+                    v2[0] = v2[0] + a2;
+
+
+
+
+                } else {
+                    var a1 = fx / m1;
+                    var a2 = fx / m2;
+                    v[0] = v[0] + a1;
+                    v2[0] = v2[0] - a2;
+                }
+
+
+
+                if (y > y2) {
+
+                    var a1 = fy / m1;
+                    var a2 = fy / m2;
+                    v[1] = v[1] + a1;
+                    v2[1] = v2[1] - a2;
+                } else {
+
+                    var a1 = fy / m1;
+                    var a2 = fy / m2;
+                    v[1] = v[1] + a1;
+                    v2[1] = v2[1] - a2;
+
+                }
+            }
+        }
+
+        function circle(x, y, r) {
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2, true);
+            ctx.fill();
+        }
+
+        function rect(x, y, w, h) {
+            ctx.beginPath();
+            ctx.rect(x, y, w, h);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+
+        function clear() {
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+        }
+
+        function init() {
+            canvas = document.getElementById("canvas");
+            ctx = canvas.getContext("2d");
+            return setInterval(draw, timeinterval);
+        }
+
+
+        function draw() {
+            var xr = x2 - x;
+            var yr = y2 - y;
+
+            grav(xr, yr, N, 0.9999990312860942, mass, mass2);
+            clear();
+            ctx.fillStyle = "#95a5a6";
+            ctx.strokeStyle = "black";
+            rect(0, 0, WIDTH, HEIGHT);
+            ctx.fillStyle = "#2c3e50";
+
+            x = x + (timeinterval / 1000) * v[0];
+            y = y + (timeinterval / 1000) * v[1];
+            circle(x, y, 10);
+
+            ctx.fillStyle = "#c0392b";
+
+
+            x2 = x2 + (timeinterval / 1000) * v2[0];
+            y2 = y2 + (timeinterval / 1000) * v2[1];
+
+            circle(x2, y2, 10);
+
+            //  $("small").text(v[0] + "," + v2[0]);
+            if (!timestop) {
+                time += timeinterval;
+                $("h3").text(time);
+
+            } else {
+                if (!buzzed) {
+                    //       var audio = new Audio('http://www.freesfx.co.uk/rx2/mp3s/5/16877_1461333021.mp3');
+                    // audio.play();
+                } else {
+                    buzzed = true;
+                }
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,315 @@
+<!doctype html>
+
+<meta name="robots" content="noindex">
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Canvas Test</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/synaptic/1.1.4/synaptic.js"></script>
+<style id="jsbin-css">
+canvas{width:500px;height:500px;background-color: black;}
+</style>
+</head>
+
+<body>
+  <section>
+<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+<h1>Momentum:  <small></small>  </h1>
+    <div>
+      <canvas id="canvas" width="500" height="500">
+        This text is displayed if your browser does not support HTML5 Canvas.
+      </canvas>
+    </div>
+
+  </section>
+
+  <h3></h3>
+
+  <table>
+    <tr>
+      <th>Mass</th>
+      <th>X</th>
+      <th>Y</th>
+      <th>VX</th>
+      <th>VY</th>
+    </tr>
+  </table>
+<script id="jsbin-javascript">
+function randomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function pythagorean(sideA, sideB){
+  return Math.sqrt(Math.pow(sideA, 2) + Math.pow(sideB, 2));
+}
+
+
+var COUNT=2;
+var N = -2;
+var timeinterval = .00000005;
+var canvas;
+var ctx;
+var G=1;
+var WIDTH = 500;
+var HEIGHT = 500;
+var colors=["#00a8ff","#9c88ff","#fbc531","#4cd137","#487eb0","#0097e6","#8c7ae6","#e1b12c","#44bd32","#40739e","#e84118","#f5f6fa","#7f8fa6","#273c75","#c23616","#dcdde1","#718093"];
+var clusters=[];
+class Mass{
+  constructor(mass,x,y,cluster){
+    this.mass=mass;
+    this.x=x;
+    this.y=y;
+    this.vx=0;
+    this.vy=0;
+    this.Fnet=0;
+    this.color=colors[Math.floor(Math.random() * colors.length)];
+    this.cluster=cluster;
+  }
+  get whichCluster() {
+    return this.IsClustered();
+  }
+  // Methoda
+  IsClustered() {
+    return this.cluster;
+  }
+
+}
+
+class Cluster{
+    constructor(x,y){
+
+    this.mass=mass;
+    this.x=x;
+    this.y=y;
+    this.vx=0;
+    this.vy=0;
+    this.masses=[];
+    }
+}var masses=[]; // Creates an Array of Masses
+var uniquemasses=masses;
+var angleIncrement=2*Math.PI/(COUNT);
+var angle=0;
+var R=randomNumber(50,250);
+for(var i=0;i<COUNT;i++){
+  if(COUNT==2){
+    var x=R*Math.cos(randomNumber(0,2*Math.PI)),y=R*Math.sin(randomNumber(0,2*Math.PI));
+    masses[i]=new Mass(5,250+x,250+y,i);
+    clusters[i]=[i];
+    angle+=angleIncrement;
+
+  }else{
+    var x=R*Math.cos(angle),y=R*Math.sin(angle);
+    masses[i]=new Mass(5,250+x,250+y,i);
+    clusters[i]=[i];
+    angle+=angleIncrement;
+}  var row="<tr><td>Mass "+i+"</td><td class=px"+i+">"+masses[i].x+"</td><td class=py"+i+">"+masses[i].y+"</td><td class=vx"+i+">0</td><td class=vy"+i+">0</td></tr>";
+  $("table").append(row);
+}
+
+var clusterNumber=789789;
+var timestop = false;
+var time = 0;
+var buzzed=false;
+
+function IsClustered(){
+    var is=true;
+    var center=[0,0];
+    var total=[0,0];
+    for(var mass in masses)
+        {
+            var m=masses[mass];
+             total[0]=total[0]+m.x;
+            total[1]=total[1]+m.y;
+        }
+    center[0]=total[0]/COUNT;
+
+    center[1]=total[1]/COUNT;
+
+    for(var mass in masses){
+        var m=masses[mass];
+        var distance=[center[0]-m.x,center[1]-m.y];
+
+        var d=pythagorean(distance[0],distance[1]);
+
+        if(d>10){
+            is=false;
+        }
+    }
+
+    return is;
+}
+
+function stopAll(){
+
+    for(var mass in masses){
+        var m=masses[mass];
+        m.vx=0;
+        m.vy=0;
+    }
+
+    timestop = true;
+};
+
+
+
+function applyGravity() {
+
+  clear();// Resets the Screen and Redraws the background
+
+  var forces=[];
+
+
+    for(var mass in masses){
+    var m=masses[mass];
+    var Fx=0;
+    var Fy=0;
+        for(var othermass in masses){
+          var om=masses[othermass];  if(othermass!=mass){
+
+            var xr=om.x-m.x;
+            var yr=om.y-m.y;
+            var fx = (G * m.mass * om.mass * Math.pow(xr, N));
+            var fy=(G * m.mass * om.mass * Math.pow(yr, N));
+
+            if(xr>0){
+               Fx+=fx;
+               }
+                else{
+            Fx-=fx;
+                }
+                if(yr>0){
+
+               Fy+=fy;
+
+                }
+                else{
+
+            Fy-=fy;
+
+                }
+
+
+
+            if(Math.abs(om.x-m.x)>10&&Math.abs(om.y-m.y)>10){
+              var c1=om.cluster;
+              var c2=m.cluster;
+              var allc=[];
+              var holdingc=[];
+              for(var x in clusters[c1]){
+                allc.push(x);
+              }
+              clusters[c1]=[];
+              for(var y in clusters[c1]){
+
+                    allc.push(y);
+              }
+              clusters[c2]=[];
+              for(var z in allc){
+                  var mmm=masses[z];
+
+                  mmm.cluster=clusterNumber;
+              }
+                  clusters[clusterNumber]=allc;
+                  clusterNumber++;
+            }
+
+        }}
+      var ax = Fx/m.mass;
+      var ay = Fy/m.mass;
+        forces[mass]=[ax,ay];
+
+    }
+
+
+   for(var mass in forces){
+     var m = masses[mass];
+      var ax = forces[mass][0];
+      var ay = forces[mass][1];
+      m.vx = m.vx + ax;
+      m.vy = m.vy + ay;
+      ctx.fillStyle = m.color;
+      m.x = m.x + (timeinterval / 1000) * m.vx;
+      m.y = m.y + (timeinterval / 1000) * m.vy;
+      circle(m.x, m.y, 10);
+      var class1=".vx"+mass,class2=".vy"+mass,c3=".px"+mass,c4=".py"+mass;
+      $(class1).text(m.vx);
+      $(class2).text(m.vy);
+      $(c3).text(m.x);
+      $(c4).text(m.y);
+   }
+
+
+
+
+
+
+
+}
+
+
+
+function circle(x, y, r) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2, true);
+  ctx.fill();
+}
+
+function rect(x, y, w, h) {
+  ctx.beginPath();
+  ctx.rect(x, y, w, h);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+
+function clear() {
+  ctx.clearRect(0, 0, WIDTH, HEIGHT);
+  ctx.strokeStyle = "black";
+  ctx.fillStyle = "#95a5a6";
+  rect(0, 0, WIDTH, HEIGHT);
+}
+
+function init() {
+  canvas = document.getElementById("canvas");
+  ctx = canvas.getContext("2d");
+  return setInterval(draw, timeinterval);
+}
+
+
+function draw() {
+
+if (IsClustered()) {
+    stopAll();
+   // console.log(IsClustered());
+  }
+    else{
+        applyGravity();
+    }
+
+
+  if (!timestop) {
+    time += timeinterval;
+    $("h3").text(time);
+
+  }
+  else{
+    if(!buzzed){
+
+    }
+    else{buzzed=true; }
+  }
+}
+
+init();
+
+
+
+</script>
+</body>
+
+</html>
+
+
+
+<!--Once Clustered they will (hopefully) stick ¯\_(ツ)_/¯-->
